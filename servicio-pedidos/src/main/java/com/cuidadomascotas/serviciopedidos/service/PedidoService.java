@@ -1,6 +1,9 @@
 package com.cuidadomascotas.serviciopedidos.service;
 
+import com.cuidadomascotas.serviciopedidos.dto.EstadoPedidoDTO;
 import com.cuidadomascotas.serviciopedidos.dto.PedidoDTO;
+import com.cuidadomascotas.serviciopedidos.exception.RecursoNoEncontradoException;
+import com.cuidadomascotas.serviciopedidos.model.EstadoPedido;
 import com.cuidadomascotas.serviciopedidos.model.Pedido;
 import com.cuidadomascotas.serviciopedidos.repository.PedidoRepository;
 import org.slf4j.Logger;
@@ -32,9 +35,14 @@ public class PedidoService {
         return pedidoRepository.findById(id);
     }
 
-    public List<Pedido> obtenerPorEstado(String estado) {
+    public Pedido obtenerPorIdObligatorio(Long id) {
+        return pedidoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("No existe un pedido con el ID " + id));
+    }
+
+    public List<Pedido> obtenerPorEstado(EstadoPedido estado) {
         log.debug("Buscando pedidos con estado: {}", estado);
-        return pedidoRepository.findByEstadoIgnoreCase(estado);
+        return pedidoRepository.findByEstado(estado);
     }
 
     public List<Pedido> obtenerPorCategoria(String categoria) {
@@ -49,40 +57,38 @@ public class PedidoService {
         pedido.setCategoriaProducto(dto.getCategoriaProducto());
         pedido.setCantidad(dto.getCantidad());
         pedido.setPrecioUnitario(dto.getPrecioUnitario());
-        pedido.setPrecioTotal(dto.getPrecioUnitario() * dto.getCantidad());
         pedido.setNombreCliente(dto.getNombreCliente());
         pedido.setFechaPedido(dto.getFechaPedido());
-        pedido.setEstado("Pendiente");
+        pedido.setEstado(dto.getEstado());
         Pedido guardado = pedidoRepository.save(pedido);
         log.info("Pedido guardado con id: {}", guardado.getId());
         return guardado;
     }
 
-    public Optional<Pedido> actualizar(Long id, PedidoDTO dto) {
+    public Pedido actualizar(Long id, PedidoDTO dto) {
         log.info("Actualizando pedido con id: {}", id);
-        return pedidoRepository.findById(id).map(pedido -> {
-            pedido.setNombreProducto(dto.getNombreProducto());
-            pedido.setCategoriaProducto(dto.getCategoriaProducto());
-            pedido.setCantidad(dto.getCantidad());
-            pedido.setPrecioUnitario(dto.getPrecioUnitario());
-            pedido.setPrecioTotal(dto.getPrecioUnitario() * dto.getCantidad());
-            pedido.setNombreCliente(dto.getNombreCliente());
-            pedido.setFechaPedido(dto.getFechaPedido());
-            if (dto.getEstado() != null) {
-                pedido.setEstado(dto.getEstado());
-            }
-            return pedidoRepository.save(pedido);
-        });
+        Pedido pedido = obtenerPorIdObligatorio(id);
+        pedido.setNombreProducto(dto.getNombreProducto());
+        pedido.setCategoriaProducto(dto.getCategoriaProducto());
+        pedido.setCantidad(dto.getCantidad());
+        pedido.setPrecioUnitario(dto.getPrecioUnitario());
+        pedido.setNombreCliente(dto.getNombreCliente());
+        pedido.setFechaPedido(dto.getFechaPedido());
+        pedido.setEstado(dto.getEstado());
+        return pedidoRepository.save(pedido);
     }
 
-    public boolean eliminar(Long id) {
-        if (pedidoRepository.existsById(id)) {
-            pedidoRepository.deleteById(id);
-            log.info("Pedido con id {} eliminado", id);
-            return true;
-        }
-        log.warn("Intento de eliminar pedido inexistente con id: {}", id);
-        return false;
+    public Pedido actualizarEstado(Long id, EstadoPedidoDTO dto) {
+        log.info("Actualizando estado del pedido {} a {}", id, dto.getEstado());
+        Pedido pedido = obtenerPorIdObligatorio(id);
+        pedido.setEstado(dto.getEstado());
+        return pedidoRepository.save(pedido);
+    }
+
+    public void eliminar(Long id) {
+        Pedido pedido = obtenerPorIdObligatorio(id);
+        pedidoRepository.delete(pedido);
+        log.info("Pedido con id {} eliminado", id);
     }
 }
 

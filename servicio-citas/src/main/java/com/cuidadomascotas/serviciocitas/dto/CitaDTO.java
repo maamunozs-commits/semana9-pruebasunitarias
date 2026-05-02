@@ -1,104 +1,100 @@
 package com.cuidadomascotas.serviciocitas.dto;
 
+import com.cuidadomascotas.serviciocitas.model.EstadoCita;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class CitaDTO {
 
-    @NotBlank(message = "El nombre de la mascota es obligatorio")
-    @Size(max = 100, message = "El nombre de la mascota no puede superar 100 caracteres")
-    private String nombreMascota;
+    @NotBlank(message = "El nombre del paciente es obligatorio")
+    @Size(max = 100, message = "El nombre del paciente no puede superar 100 caracteres")
+    private String nombrePaciente;
 
-    @NotBlank(message = "El tipo de mascota es obligatorio")
-    @Size(max = 50, message = "El tipo de mascota no puede superar 50 caracteres")
-    private String tipoMascota;
+    @NotBlank(message = "El email del paciente es obligatorio")
+    @Email(message = "El email del paciente debe tener un formato valido")
+    @Size(max = 120, message = "El email del paciente no puede superar 120 caracteres")
+    private String emailPaciente;
 
-    @NotBlank(message = "El nombre del dueño es obligatorio")
-    @Size(max = 100, message = "El nombre del dueño no puede superar 100 caracteres")
-    private String nombreDueno;
+    @NotBlank(message = "La especialidad es obligatoria")
+    @Size(max = 100, message = "La especialidad no puede superar 100 caracteres")
+    private String especialidad;
 
-    @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "El teléfono debe contener entre 7 y 15 dígitos")
-    private String telefonoDueno;
+    @NotBlank(message = "El nombre del medico es obligatorio")
+    @Size(max = 100, message = "El nombre del medico no puede superar 100 caracteres")
+    private String nombreMedico;
 
-    @NotBlank(message = "El servicio es obligatorio")
-    @Size(max = 100, message = "El servicio no puede superar 100 caracteres")
-    private String servicio;
+    @NotNull(message = "La fecha de la cita es obligatoria")
+    @FutureOrPresent(message = "La fecha de la cita debe ser actual o futura")
+    private LocalDate fechaCita;
 
-    @NotBlank(message = "El veterinario es obligatorio")
-    @Size(max = 100, message = "El veterinario no puede superar 100 caracteres")
-    private String veterinario;
+    @NotNull(message = "La hora de la cita es obligatoria")
+    private LocalTime horaCita;
 
-    @NotBlank(message = "La fecha y hora son obligatorias")
-    private String fechaHora;
-
-    private String estado;
+    @NotNull(message = "El estado es obligatorio")
+    private EstadoCita estado;
 
     public CitaDTO() {
     }
 
-    public String getNombreMascota() {
-        return nombreMascota;
+    public String getNombrePaciente() {
+        return nombrePaciente;
     }
 
-    public void setNombreMascota(String nombreMascota) {
-        this.nombreMascota = nombreMascota;
+    public void setNombrePaciente(String nombrePaciente) {
+        this.nombrePaciente = nombrePaciente;
     }
 
-    public String getTipoMascota() {
-        return tipoMascota;
+    public String getEmailPaciente() {
+        return emailPaciente;
     }
 
-    public void setTipoMascota(String tipoMascota) {
-        this.tipoMascota = tipoMascota;
+    public void setEmailPaciente(String emailPaciente) {
+        this.emailPaciente = emailPaciente;
     }
 
-    public String getNombreDueno() {
-        return nombreDueno;
+    public String getEspecialidad() {
+        return especialidad;
     }
 
-    public void setNombreDueno(String nombreDueno) {
-        this.nombreDueno = nombreDueno;
+    public void setEspecialidad(String especialidad) {
+        this.especialidad = especialidad;
     }
 
-    public String getTelefonoDueno() {
-        return telefonoDueno;
+    public String getNombreMedico() {
+        return nombreMedico;
     }
 
-    public void setTelefonoDueno(String telefonoDueno) {
-        this.telefonoDueno = telefonoDueno;
+    public void setNombreMedico(String nombreMedico) {
+        this.nombreMedico = nombreMedico;
     }
 
-    public String getServicio() {
-        return servicio;
+    public LocalDate getFechaCita() {
+        return fechaCita;
     }
 
-    public void setServicio(String servicio) {
-        this.servicio = servicio;
+    public void setFechaCita(LocalDate fechaCita) {
+        this.fechaCita = fechaCita;
     }
 
-    public String getVeterinario() {
-        return veterinario;
+    public LocalTime getHoraCita() {
+        return horaCita;
     }
 
-    public void setVeterinario(String veterinario) {
-        this.veterinario = veterinario;
+    public void setHoraCita(LocalTime horaCita) {
+        this.horaCita = horaCita;
     }
 
-    public String getFechaHora() {
-        return fechaHora;
-    }
-
-    public void setFechaHora(String fechaHora) {
-        this.fechaHora = fechaHora;
-    }
-
-    public String getEstado() {
+    public EstadoCita getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(EstadoCita estado) {
         this.estado = estado;
     }
 }
-

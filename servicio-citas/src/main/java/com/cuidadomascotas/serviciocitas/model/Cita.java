@@ -2,54 +2,53 @@ package com.cuidadomascotas.serviciocitas.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @Entity
 @Table(name = "CITAS")
 public class Cita {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "citas_seq")
-    @SequenceGenerator(name = "citas_seq", sequenceName = "CITAS_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "NOMBRE_MASCOTA", nullable = false, length = 100)
-    private String nombreMascota;
+    @Column(name = "NOMBRE_PACIENTE", nullable = false, length = 100)
+    private String nombrePaciente;
 
-    @Column(name = "TIPO_MASCOTA", nullable = false, length = 50)
-    private String tipoMascota;
+    @Column(name = "EMAIL_PACIENTE", nullable = false, length = 120)
+    private String emailPaciente;
 
-    @Column(name = "NOMBRE_DUENO", nullable = false, length = 100)
-    private String nombreDueno;
+    @Column(name = "ESPECIALIDAD", nullable = false, length = 100)
+    private String especialidad;
 
-    @Column(name = "TELEFONO_DUENO", length = 20)
-    private String telefonoDueno;
+    @Column(name = "NOMBRE_MEDICO", nullable = false, length = 100)
+    private String nombreMedico;
 
-    @Column(name = "SERVICIO", nullable = false, length = 100)
-    private String servicio;
+    @Column(name = "FECHA_CITA", nullable = false)
+    private LocalDate fechaCita;
 
-    @Column(name = "VETERINARIO", nullable = false, length = 100)
-    private String veterinario;
+    @Convert(converter = LocalTimeStringConverter.class)
+    @Column(name = "HORA_CITA", nullable = false, length = 5)
+    private LocalTime horaCita;
 
-    @Column(name = "FECHA_HORA", nullable = false, length = 30)
-    private String fechaHora;
-
-    @Column(name = "ESTADO", nullable = false, length = 30)
-    private String estado;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ESTADO", nullable = false, length = 20)
+    private EstadoCita estado;
 
     public Cita() {
     }
 
-    public Cita(Long id, String nombreMascota, String tipoMascota, String nombreDueno,
-                String telefonoDueno, String servicio, String veterinario,
-                String fechaHora, String estado) {
+    public Cita(Long id, String nombrePaciente, String emailPaciente, String especialidad,
+                String nombreMedico, LocalDate fechaCita, LocalTime horaCita, EstadoCita estado) {
         this.id = id;
-        this.nombreMascota = nombreMascota;
-        this.tipoMascota = tipoMascota;
-        this.nombreDueno = nombreDueno;
-        this.telefonoDueno = telefonoDueno;
-        this.servicio = servicio;
-        this.veterinario = veterinario;
-        this.fechaHora = fechaHora;
+        this.nombrePaciente = nombrePaciente;
+        this.emailPaciente = emailPaciente;
+        this.especialidad = especialidad;
+        this.nombreMedico = nombreMedico;
+        this.fechaCita = fechaCita;
+        this.horaCita = horaCita;
         this.estado = estado;
     }
 
@@ -61,68 +60,59 @@ public class Cita {
         this.id = id;
     }
 
-    public String getNombreMascota() {
-        return nombreMascota;
+    public String getNombrePaciente() {
+        return nombrePaciente;
     }
 
-    public void setNombreMascota(String nombreMascota) {
-        this.nombreMascota = nombreMascota;
+    public void setNombrePaciente(String nombrePaciente) {
+        this.nombrePaciente = nombrePaciente;
     }
 
-    public String getTipoMascota() {
-        return tipoMascota;
+    public String getEmailPaciente() {
+        return emailPaciente;
     }
 
-    public void setTipoMascota(String tipoMascota) {
-        this.tipoMascota = tipoMascota;
+    public void setEmailPaciente(String emailPaciente) {
+        this.emailPaciente = emailPaciente;
     }
 
-    public String getNombreDueno() {
-        return nombreDueno;
+    public String getEspecialidad() {
+        return especialidad;
     }
 
-    public void setNombreDueno(String nombreDueno) {
-        this.nombreDueno = nombreDueno;
+    public void setEspecialidad(String especialidad) {
+        this.especialidad = especialidad;
     }
 
-    public String getTelefonoDueno() {
-        return telefonoDueno;
+    public String getNombreMedico() {
+        return nombreMedico;
     }
 
-    public void setTelefonoDueno(String telefonoDueno) {
-        this.telefonoDueno = telefonoDueno;
+    public void setNombreMedico(String nombreMedico) {
+        this.nombreMedico = nombreMedico;
     }
 
-    public String getServicio() {
-        return servicio;
+    public LocalDate getFechaCita() {
+        return fechaCita;
     }
 
-    public void setServicio(String servicio) {
-        this.servicio = servicio;
+    public void setFechaCita(LocalDate fechaCita) {
+        this.fechaCita = fechaCita;
     }
 
-    public String getVeterinario() {
-        return veterinario;
+    public LocalTime getHoraCita() {
+        return horaCita;
     }
 
-    public void setVeterinario(String veterinario) {
-        this.veterinario = veterinario;
+    public void setHoraCita(LocalTime horaCita) {
+        this.horaCita = horaCita;
     }
 
-    public String getFechaHora() {
-        return fechaHora;
-    }
-
-    public void setFechaHora(String fechaHora) {
-        this.fechaHora = fechaHora;
-    }
-
-    public String getEstado() {
+    public EstadoCita getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(EstadoCita estado) {
         this.estado = estado;
     }
 }
-

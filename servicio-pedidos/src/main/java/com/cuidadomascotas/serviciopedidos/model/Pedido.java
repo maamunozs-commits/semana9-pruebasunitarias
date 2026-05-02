@@ -2,13 +2,15 @@ package com.cuidadomascotas.serviciopedidos.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "PEDIDOS")
 public class Pedido {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pedidos_seq")
-    @SequenceGenerator(name = "pedidos_seq", sequenceName = "PEDIDOS_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
@@ -19,38 +21,35 @@ public class Pedido {
     private String categoriaProducto;
 
     @Column(name = "CANTIDAD", nullable = false)
-    private int cantidad;
+    private Integer cantidad;
 
-    @Column(name = "PRECIO_UNITARIO", nullable = false)
-    private double precioUnitario;
+    @Column(name = "PRECIO_UNITARIO", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioUnitario;
 
-    @Column(name = "PRECIO_TOTAL", nullable = false)
-    private double precioTotal;
-
-    @Column(name = "ESTADO", nullable = false, length = 30)
-    private String estado;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ESTADO", nullable = false, length = 20)
+    private EstadoPedido estado;
 
     @Column(name = "NOMBRE_CLIENTE", nullable = false, length = 100)
     private String nombreCliente;
 
-    @Column(name = "FECHA_PEDIDO", nullable = false, length = 20)
-    private String fechaPedido;
+    @Column(name = "FECHA_PEDIDO", nullable = false)
+    private LocalDate fechaPedido;
 
     public Pedido() {
     }
 
-    public Pedido(Long id, String nombreProducto, String categoriaProducto, int cantidad,
-                  double precioUnitario, double precioTotal, String estado,
-                  String nombreCliente, String fechaPedido) {
+    public Pedido(Long id, String nombreProducto, String categoriaProducto, Integer cantidad,
+                  BigDecimal precioUnitario, String nombreCliente, LocalDate fechaPedido,
+                  EstadoPedido estado) {
         this.id = id;
         this.nombreProducto = nombreProducto;
         this.categoriaProducto = categoriaProducto;
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
-        this.precioTotal = precioTotal;
-        this.estado = estado;
         this.nombreCliente = nombreCliente;
         this.fechaPedido = fechaPedido;
+        this.estado = estado;
     }
 
     public Long getId() {
@@ -77,35 +76,27 @@ public class Pedido {
         this.categoriaProducto = categoriaProducto;
     }
 
-    public int getCantidad() {
+    public Integer getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(int cantidad) {
+    public void setCantidad(Integer cantidad) {
         this.cantidad = cantidad;
     }
 
-    public double getPrecioUnitario() {
+    public BigDecimal getPrecioUnitario() {
         return precioUnitario;
     }
 
-    public void setPrecioUnitario(double precioUnitario) {
+    public void setPrecioUnitario(BigDecimal precioUnitario) {
         this.precioUnitario = precioUnitario;
     }
 
-    public double getPrecioTotal() {
-        return precioTotal;
-    }
-
-    public void setPrecioTotal(double precioTotal) {
-        this.precioTotal = precioTotal;
-    }
-
-    public String getEstado() {
+    public EstadoPedido getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(EstadoPedido estado) {
         this.estado = estado;
     }
 
@@ -117,11 +108,11 @@ public class Pedido {
         this.nombreCliente = nombreCliente;
     }
 
-    public String getFechaPedido() {
+    public LocalDate getFechaPedido() {
         return fechaPedido;
     }
 
-    public void setFechaPedido(String fechaPedido) {
+    public void setFechaPedido(LocalDate fechaPedido) {
         this.fechaPedido = fechaPedido;
     }
 }

@@ -1,10 +1,14 @@
 package com.cuidadomascotas.serviciopedidos.dto;
 
+import com.cuidadomascotas.serviciopedidos.model.EstadoPedido;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class PedidoDTO {
 
@@ -12,25 +16,27 @@ public class PedidoDTO {
     @Size(max = 150, message = "El nombre del producto no puede superar 150 caracteres")
     private String nombreProducto;
 
-    @NotBlank(message = "La categoría del producto es obligatoria")
-    @Size(max = 50, message = "La categoría no puede superar 50 caracteres")
+    @NotBlank(message = "La categoria del producto es obligatoria")
+    @Size(max = 50, message = "La categoria no puede superar 50 caracteres")
     private String categoriaProducto;
 
+    @NotNull(message = "La cantidad es obligatoria")
     @Min(value = 1, message = "La cantidad debe ser al menos 1")
-    private int cantidad;
+    private Integer cantidad;
 
     @NotNull(message = "El precio unitario es obligatorio")
     @Positive(message = "El precio unitario debe ser mayor a 0")
-    private double precioUnitario;
+    private BigDecimal precioUnitario;
 
     @NotBlank(message = "El nombre del cliente es obligatorio")
     @Size(max = 100, message = "El nombre del cliente no puede superar 100 caracteres")
     private String nombreCliente;
 
-    @NotBlank(message = "La fecha del pedido es obligatoria")
-    private String fechaPedido;
+    @NotNull(message = "La fecha del pedido es obligatoria")
+    private LocalDate fechaPedido;
 
-    private String estado;
+    @NotNull(message = "El estado es obligatorio")
+    private EstadoPedido estado;
 
     public PedidoDTO() {
     }
@@ -51,19 +57,19 @@ public class PedidoDTO {
         this.categoriaProducto = categoriaProducto;
     }
 
-    public int getCantidad() {
+    public Integer getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(int cantidad) {
+    public void setCantidad(Integer cantidad) {
         this.cantidad = cantidad;
     }
 
-    public double getPrecioUnitario() {
+    public BigDecimal getPrecioUnitario() {
         return precioUnitario;
     }
 
-    public void setPrecioUnitario(double precioUnitario) {
+    public void setPrecioUnitario(BigDecimal precioUnitario) {
         this.precioUnitario = precioUnitario;
     }
 
@@ -75,20 +81,19 @@ public class PedidoDTO {
         this.nombreCliente = nombreCliente;
     }
 
-    public String getFechaPedido() {
+    public LocalDate getFechaPedido() {
         return fechaPedido;
     }
 
-    public void setFechaPedido(String fechaPedido) {
+    public void setFechaPedido(LocalDate fechaPedido) {
         this.fechaPedido = fechaPedido;
     }
 
-    public String getEstado() {
+    public EstadoPedido getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(EstadoPedido estado) {
         this.estado = estado;
     }
 }
-

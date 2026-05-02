@@ -1,16 +1,26 @@
 package com.cuidadomascotas.serviciocitas.controller;
 
 import com.cuidadomascotas.serviciocitas.dto.CitaDTO;
+import com.cuidadomascotas.serviciocitas.dto.DisponibilidadDTO;
+import com.cuidadomascotas.serviciocitas.dto.EstadoCitaDTO;
 import com.cuidadomascotas.serviciocitas.model.Cita;
+import com.cuidadomascotas.serviciocitas.model.EstadoCita;
 import com.cuidadomascotas.serviciocitas.service.CitaService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/citas")
@@ -25,59 +35,83 @@ public class CitaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Cita>> obtenerTodas() {
+    public ResponseEntity<CollectionModel<EntityModel<Cita>>> obtenerTodas() {
         log.info("GET /api/citas - Obteniendo todas las citas");
-        return ResponseEntity.ok(citaService.obtenerTodas());
+        List<EntityModel<Cita>> citas = citaService.obtenerTodas().stream()
+                .map(this::toModel)
+                .toList();
+        return ResponseEntity.ok(CollectionModel.of(citas)
+                .add(linkTo(methodOn(CitaController.class).obtenerTodas()).withSelfRel())
+                .add(linkTo(methodOn(CitaController.class).crear(null)).withRel("crear")));
+    }
+
+    @GetMapping("/disponibilidad")
+    public ResponseEntity<EntityModel<DisponibilidadDTO>> consultarDisponibilidad(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        log.info("GET /api/citas/disponibilidad - Consultando disponibilidad para fecha {}", fecha);
+        DisponibilidadDTO disponibilidad = citaService.consultarDisponibilidad(fecha);
+        return ResponseEntity.ok(EntityModel.of(disponibilidad)
+                .add(linkTo(methodOn(CitaController.class).consultarDisponibilidad(fecha)).withSelfRel())
+                .add(linkTo(methodOn(CitaController.class).obtenerTodas()).withRel("citas"))
+                .add(linkTo(methodOn(CitaController.class).crear(null)).withRel("crear")));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Cita> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Cita>> obtenerPorId(@PathVariable Long id) {
         log.info("GET /api/citas/{} - Buscando cita por id", id);
-        return citaService.obtenerPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(toModel(citaService.obtenerPorIdObligatorio(id)));
     }
 
     @GetMapping("/estado/{estado}")
-    public ResponseEntity<List<Cita>> obtenerPorEstado(@PathVariable String estado) {
+    public ResponseEntity<CollectionModel<EntityModel<Cita>>> obtenerPorEstado(@PathVariable EstadoCita estado) {
         log.info("GET /api/citas/estado/{} - Filtrando citas por estado", estado);
-        return ResponseEntity.ok(citaService.obtenerPorEstado(estado));
+        List<EntityModel<Cita>> citas = citaService.obtenerPorEstado(estado).stream()
+                .map(this::toModel)
+                .toList();
+        return ResponseEntity.ok(CollectionModel.of(citas)
+                .add(linkTo(methodOn(CitaController.class).obtenerPorEstado(estado)).withSelfRel())
+                .add(linkTo(methodOn(CitaController.class).obtenerTodas()).withRel("citas")));
     }
 
-    @GetMapping("/veterinario/{veterinario}")
-    public ResponseEntity<List<Cita>> obtenerPorVeterinario(@PathVariable String veterinario) {
-        log.info("GET /api/citas/veterinario/{} - Filtrando citas por veterinario", veterinario);
-        return ResponseEntity.ok(citaService.obtenerPorVeterinario(veterinario));
+    @GetMapping("/medico/{nombreMedico}")
+    public ResponseEntity<CollectionModel<EntityModel<Cita>>> obtenerPorMedico(@PathVariable String nombreMedico) {
+        log.info("GET /api/citas/medico/{} - Filtrando citas por medico", nombreMedico);
+        List<EntityModel<Cita>> citas = citaService.obtenerPorMedico(nombreMedico).stream()
+                .map(this::toModel)
+                .toList();
+        return ResponseEntity.ok(CollectionModel.of(citas)
+                .add(linkTo(methodOn(CitaController.class).obtenerPorMedico(nombreMedico)).withSelfRel())
+                .add(linkTo(methodOn(CitaController.class).obtenerTodas()).withRel("citas")));
     }
 
     @PostMapping
-    public ResponseEntity<Cita> crear(@Valid @RequestBody CitaDTO citaDTO) {
-        log.info("POST /api/citas - Creando nueva cita para mascota: {}", citaDTO.getNombreMascota());
+    public ResponseEntity<EntityModel<Cita>> crear(@Valid @RequestBody CitaDTO citaDTO) {
+        log.info("POST /api/citas - Creando nueva cita para paciente: {}", citaDTO.getNombrePaciente());
         Cita creada = citaService.crear(citaDTO);
-        log.info("Cita creada con id: {}", creada.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(creada);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toModel(creada));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cita> actualizar(@PathVariable Long id, @Valid @RequestBody CitaDTO citaDTO) {
+    public ResponseEntity<EntityModel<Cita>> actualizar(@PathVariable Long id,
+                                                        @Valid @RequestBody CitaDTO citaDTO) {
         log.info("PUT /api/citas/{} - Actualizando cita", id);
-        return citaService.actualizar(id, citaDTO)
-                .map(c -> {
-                    log.info("Cita {} actualizada correctamente", id);
-                    return ResponseEntity.ok(c);
-                })
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(toModel(citaService.actualizar(id, citaDTO)));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        log.info("DELETE /api/citas/{} - Eliminando cita", id);
-        if (citaService.eliminar(id)) {
-            log.info("Cita {} eliminada correctamente", id);
-            return ResponseEntity.noContent().build();
-        }
-        log.warn("Cita {} no encontrada para eliminar", id);
-        return ResponseEntity.notFound().build();
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<EntityModel<Cita>> cancelar(@PathVariable Long id,
+                                                      @Valid @RequestBody EstadoCitaDTO estadoDTO) {
+        log.info("PATCH /api/citas/{}/cancelar - Cancelando cita", id);
+        return ResponseEntity.ok(toModel(citaService.cancelar(id, estadoDTO)));
+    }
+
+    private EntityModel<Cita> toModel(Cita cita) {
+        return EntityModel.of(cita)
+                .add(linkTo(methodOn(CitaController.class).obtenerPorId(cita.getId())).withSelfRel())
+                .add(linkTo(methodOn(CitaController.class).obtenerTodas()).withRel("citas"))
+                .add(linkTo(methodOn(CitaController.class).crear(null)).withRel("crear"))
+                .add(linkTo(methodOn(CitaController.class).actualizar(cita.getId(), null)).withRel("actualizar"))
+                .add(linkTo(methodOn(CitaController.class).cancelar(cita.getId(), null)).withRel("cancelar"))
+                .add(linkTo(methodOn(CitaController.class).consultarDisponibilidad(cita.getFechaCita())).withRel("disponibilidad"));
     }
 }
-

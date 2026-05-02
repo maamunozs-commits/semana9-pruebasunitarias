@@ -1,139 +1,428 @@
-# Microservicios - Cuidado Mascotas
+# Microservicios Pedidos y Citas - DSY2201 Semana 8
 
-Proyecto de dos microservicios REST desarrollados con Spring Boot 3 y Oracle XE, para la asignatura **DSY2201**.
+Proyecto academico de Desarrollo Fullstack I con dos microservicios REST en Spring Boot para gestion de pedidos de productos y reservas de citas medicas. El proyecto esta preparado para revision local con Oracle XE y tambien permite cambiar la conexion mediante variables de entorno.
 
----
+## Revision Rapida Para El Profesor
 
-## Microservicios
+### Requisitos
 
-| Servicio | Puerto | Endpoints base |
-|---|---|---|
-| servicio-pedidos | 8081 | `/api/pedidos` |
-| servicio-citas | 8082 | `/api/citas` |
+- JDK 21.
+- Maven 3.9 o superior.
+- Oracle XE/local con servicio `XEPDB1`.
+- SQL Developer.
+- Usuario Oracle local:
+  - Usuario: `CUIDADOMASCOTAS`
+  - Password: `Mascotas123`
 
----
+La configuracion local ya viene lista en ambos `application.properties`. Si Oracle esta corriendo en `localhost:1521/XEPDB1`, no es necesario definir variables de entorno.
 
-## Tecnologías
+### 1. Crear Tablas Y Datos
 
-- Java 17 / Spring Boot 3.3.5
-- Spring Data JPA + Hibernate
-- Oracle XE (XEPDB1)
-- Bean Validation
-- Maven multi-módulo
-
----
-
-## Requisitos previos
-
-- Java 17+
-- Maven 3.8+
-- Oracle XE corriendo en `localhost:1521`
-
----
-
-## Configuración Oracle
-
-Conectado como **SYSTEM** en SQL Developer, ejecutar:
+En SQL Developer, conectarse como `CUIDADOMASCOTAS` y ejecutar con F5:
 
 ```sql
-ALTER PROFILE DEFAULT LIMIT PASSWORD_VERIFY_FUNCTION NULL;
-DROP USER CUIDADOMASCOTAS CASCADE;
-CREATE USER CUIDADOMASCOTAS IDENTIFIED BY mascotas;
-GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO CUIDADOMASCOTAS;
-ALTER USER CUIDADOMASCOTAS ACCOUNT UNLOCK;
+@database/pedidos.sql
+@database/citas.sql
 ```
 
-Luego conectado como **CUIDADOMASCOTAS**, ejecutar el script `tablas_oracle.sql` incluido en la raíz del proyecto.
+Verificar datos:
 
----
+```sql
+SELECT COUNT(*) FROM PEDIDOS;
+SELECT COUNT(*) FROM CITAS;
+SELECT * FROM PEDIDOS;
+SELECT * FROM CITAS;
+```
 
-## Ejecutar los microservicios
+Cada tabla queda con 3 registros iniciales.
 
-Abrir dos terminales desde la raíz del proyecto:
+### 2. Ejecutar Microservicios
 
-**Terminal 1:**
+Desde la raiz del proyecto:
+
+```bash
+mvn -pl servicio-pedidos spring-boot:run
+```
+
+En otra terminal, tambien desde la raiz:
+
+```bash
+mvn -pl servicio-citas spring-boot:run
+```
+
+Tambien se puede entrar directamente a cada carpeta:
+
 ```bash
 cd servicio-pedidos
 mvn spring-boot:run
 ```
 
-**Terminal 2:**
 ```bash
 cd servicio-citas
 mvn spring-boot:run
 ```
 
----
+URLs principales:
 
-## Endpoints disponibles
+```text
+http://localhost:8081/api/pedidos
+http://localhost:8082/api/citas
+```
 
-### Servicio Pedidos — `http://localhost:8081`
+### 3. Probar JUnit Y Generar JAR
 
-| Método | URL | Descripción |
+Ejecutar pruebas:
+
+```bash
+mvn test
+```
+
+El proyecto incluye 6 pruebas unitarias en total: 3 para pedidos y 3 para citas.
+
+Generar JAR:
+
+```bash
+mvn clean package
+```
+
+JARs generados:
+
+```text
+servicio-pedidos/target/servicio-pedidos-1.0.0-SNAPSHOT.jar
+servicio-citas/target/servicio-citas-1.0.0-SNAPSHOT.jar
+```
+
+## Microservicios Incluidos
+
+| Microservicio | Puerto | Responsabilidad |
+|---|---:|---|
+| `servicio-pedidos` | 8081 | Gestiona ordenes de compra de productos para mascotas |
+| `servicio-citas` | 8082 | Gestiona reservas de citas medicas |
+
+## Tecnologias
+
+- Java 21
+- Spring Boot 3.5.x
+- Maven multi-modulo
+- Spring Web
+- Spring Data JPA
+- Oracle Database / Oracle Cloud
+- Jakarta Validation
+- Spring HATEOAS
+- JUnit 5 y Mockito
+- Docker y Docker Compose
+- Postman
+
+## Estructura Del Proyecto
+
+```text
+microservicios-pedidos-citas/
+  pom.xml
+  README.md
+  docker-compose.yml
+  tablas_oracle.sql
+  database/
+    pedidos.sql
+    citas.sql
+  servicio-pedidos/
+    Dockerfile
+    pom.xml
+    src/main/java/.../controller
+    src/main/java/.../dto
+    src/main/java/.../exception
+    src/main/java/.../model
+    src/main/java/.../repository
+    src/main/java/.../service
+    src/main/resources/application.properties
+    src/test/java/.../service
+  servicio-citas/
+    Dockerfile
+    pom.xml
+    src/main/java/.../controller
+    src/main/java/.../dto
+    src/main/java/.../exception
+    src/main/java/.../model
+    src/main/java/.../repository
+    src/main/java/.../service
+    src/main/resources/application.properties
+    src/test/java/.../service
+```
+
+## Configuracion De Base De Datos
+
+Valores locales por defecto:
+
+```text
+DB_URL=jdbc:oracle:thin:@localhost:1521/XEPDB1
+DB_USERNAME=CUIDADOMASCOTAS
+DB_PASSWORD=Mascotas123
+```
+
+Si se desea usar Oracle Cloud u otra instancia, sobrescribir con variables de entorno.
+
+PowerShell:
+
+```powershell
+$env:DB_URL="jdbc:oracle:thin:@//host:1521/service_name"
+$env:DB_USERNAME="DB_USERNAME_AQUI"
+$env:DB_PASSWORD="DB_PASSWORD_AQUI"
+```
+
+Bash:
+
+```bash
+export DB_URL="jdbc:oracle:thin:@//host:1521/service_name"
+export DB_USERNAME="DB_USERNAME_AQUI"
+export DB_PASSWORD="DB_PASSWORD_AQUI"
+```
+
+El proyecto usa:
+
+```properties
+spring.jpa.hibernate.ddl-auto=none
+```
+
+Por eso las tablas se crean mediante scripts SQL versionados en `database/`.
+
+## Scripts SQL
+
+- `database/pedidos.sql`
+- `database/citas.sql`
+- `tablas_oracle.sql`
+
+Cada script principal incluye:
+
+- `DROP TABLE` controlado para Oracle.
+- `CREATE TABLE`.
+- `PRIMARY KEY`.
+- `GENERATED BY DEFAULT AS IDENTITY`.
+- Restricciones `NOT NULL`.
+- Restricciones `CHECK`.
+- 3 registros iniciales.
+- `COMMIT`.
+
+## Endpoints Servicio Pedidos
+
+Base URL:
+
+```text
+http://localhost:8081/api/pedidos
+```
+
+| Metodo | Endpoint | Descripcion |
 |---|---|---|
-| GET | `/api/pedidos` | Obtener todos |
-| GET | `/api/pedidos/{id}` | Obtener por ID |
+| GET | `/api/pedidos` | Listar pedidos |
+| GET | `/api/pedidos/{id}` | Buscar pedido por ID |
 | GET | `/api/pedidos/estado/{estado}` | Filtrar por estado |
-| GET | `/api/pedidos/categoria/{categoria}` | Filtrar por categoría |
+| GET | `/api/pedidos/categoria/{categoria}` | Filtrar por categoria |
 | POST | `/api/pedidos` | Crear pedido |
 | PUT | `/api/pedidos/{id}` | Actualizar pedido |
+| PATCH | `/api/pedidos/{id}/estado` | Actualizar estado |
 | DELETE | `/api/pedidos/{id}` | Eliminar pedido |
 
-### Servicio Citas — `http://localhost:8082`
+Estados validos:
 
-| Método | URL | Descripción |
+```text
+PENDIENTE, CONFIRMADO, ENVIADO, CANCELADO
+```
+
+## Endpoints Servicio Citas
+
+Base URL:
+
+```text
+http://localhost:8082/api/citas
+```
+
+| Metodo | Endpoint | Descripcion |
 |---|---|---|
-| GET | `/api/citas` | Obtener todas |
-| GET | `/api/citas/{id}` | Obtener por ID |
+| GET | `/api/citas` | Listar citas |
+| GET | `/api/citas/{id}` | Buscar cita por ID |
 | GET | `/api/citas/estado/{estado}` | Filtrar por estado |
-| GET | `/api/citas/veterinario/{nombre}` | Filtrar por veterinario |
-| POST | `/api/citas` | Crear cita |
+| GET | `/api/citas/medico/{nombreMedico}` | Filtrar por medico |
+| GET | `/api/citas/disponibilidad?fecha=YYYY-MM-DD` | Consultar disponibilidad |
+| POST | `/api/citas` | Programar cita |
 | PUT | `/api/citas/{id}` | Actualizar cita |
-| DELETE | `/api/citas/{id}` | Eliminar cita |
+| PATCH | `/api/citas/{id}/cancelar` | Cancelar cita |
 
----
+Estados validos:
 
-## Ejemplos de uso
+```text
+PROGRAMADA, CONFIRMADA, CANCELADA
+```
 
-### Crear pedido
+## Ejemplos Para Postman
+
+### Crear Pedido
+
 ```http
 POST http://localhost:8081/api/pedidos
 Content-Type: application/json
+```
 
+```json
 {
-  "nombreProducto": "Shampoo para Perros",
-  "categoriaProducto": "Higiene",
+  "nombreProducto": "Alimento Premium Perro 15kg",
+  "categoriaProducto": "Alimento",
   "cantidad": 2,
-  "precioUnitario": 7990,
-  "nombreCliente": "Valentina Reyes",
-  "fechaPedido": "2026-04-16"
+  "precioUnitario": 35990,
+  "nombreCliente": "Matias Munoz",
+  "fechaPedido": "2026-05-01",
+  "estado": "PENDIENTE"
 }
 ```
 
-### Crear cita
+### Actualizar Estado De Pedido
+
+```http
+PATCH http://localhost:8081/api/pedidos/1/estado
+Content-Type: application/json
+```
+
+```json
+{
+  "estado": "CONFIRMADO"
+}
+```
+
+### Crear Cita
+
 ```http
 POST http://localhost:8082/api/citas
 Content-Type: application/json
+```
 
+```json
 {
-  "nombreMascota": "Max",
-  "tipoMascota": "Perro",
-  "nombreDueno": "Luis Mendez",
-  "telefonoDueno": "+56911223344",
-  "servicio": "Control de peso",
-  "veterinario": "Dr. Ramirez",
-  "fechaHora": "2026-04-20 09:00"
+  "nombrePaciente": "Matias Munoz",
+  "emailPaciente": "matias@correo.cl",
+  "especialidad": "Medicina General",
+  "nombreMedico": "Dra. Andrea Soto",
+  "fechaCita": "2026-05-10",
+  "horaCita": "10:30",
+  "estado": "PROGRAMADA"
 }
 ```
 
----
+### Cancelar Cita
 
-## Validaciones
+```http
+PATCH http://localhost:8082/api/citas/1/cancelar
+Content-Type: application/json
+```
 
-Si se envían datos inválidos al POST, el servidor responde **HTTP 400** con el detalle de cada campo que falló.
+```json
+{
+  "estado": "CANCELADA"
+}
+```
 
----
+### Consultar Disponibilidad
 
-## Autor
+```http
+GET http://localhost:8082/api/citas/disponibilidad?fecha=2026-05-10
+```
 
-Matias Muñoz — DSY2201 Semana 6
+## HATEOAS
+
+Las respuestas incluyen `_links` para navegar la API.
+
+Ejemplo en pedidos:
+
+- `self`
+- `pedidos`
+- `crear`
+- `actualizar`
+- `actualizar-estado`
+
+Ejemplo en citas:
+
+- `self`
+- `citas`
+- `crear`
+- `actualizar`
+- `cancelar`
+- `disponibilidad`
+
+## Validaciones Y Errores
+
+El proyecto usa Jakarta Validation con anotaciones como:
+
+- `@NotBlank`
+- `@NotNull`
+- `@Positive`
+- `@Min`
+- `@FutureOrPresent`
+- `@Email`
+
+Los errores se responden en JSON mediante `@ControllerAdvice`.
+
+Ejemplo:
+
+```json
+{
+  "timestamp": "2026-05-01T12:00:00",
+  "status": 404,
+  "error": "No encontrado",
+  "message": "No existe un pedido con el ID 10",
+  "path": "/api/pedidos/10"
+}
+```
+
+## Docker
+
+Primero generar los JAR:
+
+```bash
+mvn clean package
+```
+
+Construir imagenes:
+
+```bash
+docker build -t servicio-pedidos ./servicio-pedidos
+docker build -t servicio-citas ./servicio-citas
+```
+
+Ejecutar contenedores apuntando al Oracle local del host:
+
+```bash
+docker run --name servicio-pedidos -p 8081:8081 -e DB_URL="jdbc:oracle:thin:@host.docker.internal:1521/XEPDB1" -e DB_USERNAME="CUIDADOMASCOTAS" -e DB_PASSWORD="Mascotas123" servicio-pedidos
+docker run --name servicio-citas -p 8082:8082 -e DB_URL="jdbc:oracle:thin:@host.docker.internal:1521/XEPDB1" -e DB_USERNAME="CUIDADOMASCOTAS" -e DB_PASSWORD="Mascotas123" servicio-citas
+```
+
+O ejecutar ambos:
+
+```bash
+docker compose up --build
+```
+
+## Evidencias Sugeridas Para La Entrega
+
+- Captura de SQL Developer con `PEDIDOS` y `CITAS`.
+- Captura de `SELECT COUNT(*) FROM PEDIDOS;`.
+- Captura de `SELECT COUNT(*) FROM CITAS;`.
+- Captura de `mvn test` con `BUILD SUCCESS`.
+- Captura de `mvn clean package` con `BUILD SUCCESS`.
+- Capturas Postman o navegador de `GET /api/pedidos` y `GET /api/citas`.
+- Captura donde se vean los `_links` HATEOAS.
+- Link del repositorio Git.
+- Link de Trello.
+- Link del video Kaltura.
+
+## Estado Del Proyecto
+
+El proyecto queda listo para entrega academica:
+
+- Dos microservicios funcionando.
+- Endpoints JSON.
+- Oracle configurado.
+- HATEOAS implementado.
+- Validaciones implementadas.
+- Manejo de errores JSON.
+- Scripts SQL incluidos.
+- 6 pruebas unitarias.
+- JAR generable.
+- Dockerfile por microservicio.
+- Docker Compose incluido.
+- Documentacion principal en este `README.md`.
