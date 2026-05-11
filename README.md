@@ -428,20 +428,6 @@ Detener contenedores:
 docker compose down
 ```
 
-## Evidencias Sugeridas Para La Entrega
-
-- Captura de SQL Developer con `PEDIDOS` y `CITAS`.
-- Captura de `SELECT COUNT(*) FROM PEDIDOS;`.
-- Captura de `SELECT COUNT(*) FROM CITAS;`.
-- Captura de `mvn test` con `BUILD SUCCESS` y 8 pruebas ejecutadas.
-- Captura de `mvn clean package` con `BUILD SUCCESS`.
-- Capturas Postman o navegador de `GET /api/pedidos` y `GET /api/citas`.
-- Captura donde se vean los `_links` HATEOAS.
-- Captura de Docker Desktop o Docker Lab con los dos contenedores ejecutandose.
-- Link del repositorio Git.
-- Link de Trello.
-- Link del video Kaltura.
-
 ## Estado Del Proyecto
 
 El proyecto queda listo para entrega academica:
