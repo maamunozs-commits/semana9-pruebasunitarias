@@ -1,8 +1,8 @@
-# Microservicios Pedidos y Citas - DSY2201 Semana 8
+# Microservicios Pedidos y Citas - DSY2201 Semana 9
 
-Proyecto academico de Desarrollo Fullstack I con dos microservicios REST en Spring Boot para gestion de pedidos de productos y reservas de citas medicas. El proyecto esta preparado para revision local con Oracle XE y tambien permite cambiar la conexion mediante variables de entorno.
+Proyecto academico de Desarrollo Fullstack I con dos microservicios REST en Spring Boot para gestion de pedidos de productos y reservas de citas medicas. Esta version corresponde a Semana 9, mantiene la base funcional anterior y agrega 4 pruebas unitarias por microservicio.
 
-## Revision Rapida Para El Profesor
+## Revision Rapida Semana 9 Para El Profesor
 
 ### Requisitos
 
@@ -77,7 +77,7 @@ Ejecutar pruebas:
 mvn test
 ```
 
-El proyecto incluye 6 pruebas unitarias en total: 3 para pedidos y 3 para citas.
+El proyecto incluye 8 pruebas unitarias en total: 4 para pedidos y 4 para citas.
 
 Generar JAR:
 
@@ -110,7 +110,8 @@ servicio-citas/target/servicio-citas-1.0.0-SNAPSHOT.jar
 - Jakarta Validation
 - Spring HATEOAS
 - JUnit 5 y Mockito
-- Docker y Docker Compose
+- Docker
+- Docker Compose
 - Postman
 
 ## Estructura Del Proyecto
@@ -298,7 +299,7 @@ Content-Type: application/json
   "emailPaciente": "matias@correo.cl",
   "especialidad": "Medicina General",
   "nombreMedico": "Dra. Andrea Soto",
-  "fechaCita": "2026-05-10",
+  "fechaCita": "2026-06-10",
   "horaCita": "10:30",
   "estado": "PROGRAMADA"
 }
@@ -320,7 +321,7 @@ Content-Type: application/json
 ### Consultar Disponibilidad
 
 ```http
-GET http://localhost:8082/api/citas/disponibilidad?fecha=2026-05-10
+GET http://localhost:8082/api/citas/disponibilidad?fecha=2026-06-10
 ```
 
 ## HATEOAS
@@ -343,6 +344,24 @@ Ejemplo en citas:
 - `actualizar`
 - `cancelar`
 - `disponibilidad`
+
+## Pruebas Unitarias Semana 9
+
+Las pruebas estan hechas con JUnit 5 y Mockito, por lo que no dependen de una conexion real a Oracle. Se prueban reglas de negocio del servicio y llamadas al repositorio simulado.
+
+Servicio pedidos:
+
+- Crear un pedido valido.
+- Actualizar estado de un pedido existente.
+- Lanzar excepcion cuando el pedido no existe.
+- Eliminar un pedido existente.
+
+Servicio citas:
+
+- Crear una cita valida.
+- Cancelar una cita programada.
+- Consultar disponibilidad excluyendo horarios ocupados.
+- Rechazar cancelacion cuando el estado enviado no es `CANCELADA`.
 
 ## Validaciones Y Errores
 
@@ -377,7 +396,7 @@ Primero generar los JAR:
 mvn clean package
 ```
 
-Construir imagenes:
+Construir imagenes con Docker:
 
 ```bash
 docker build -t servicio-pedidos ./servicio-pedidos
@@ -394,7 +413,19 @@ docker run --name servicio-citas -p 8082:8082 -e DB_URL="jdbc:oracle:thin:@host.
 O ejecutar ambos:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
+```
+
+Ver contenedores:
+
+```bash
+docker compose ps
+```
+
+Detener contenedores:
+
+```bash
+docker compose down
 ```
 
 ## Evidencias Sugeridas Para La Entrega
@@ -402,10 +433,11 @@ docker compose up --build
 - Captura de SQL Developer con `PEDIDOS` y `CITAS`.
 - Captura de `SELECT COUNT(*) FROM PEDIDOS;`.
 - Captura de `SELECT COUNT(*) FROM CITAS;`.
-- Captura de `mvn test` con `BUILD SUCCESS`.
+- Captura de `mvn test` con `BUILD SUCCESS` y 8 pruebas ejecutadas.
 - Captura de `mvn clean package` con `BUILD SUCCESS`.
 - Capturas Postman o navegador de `GET /api/pedidos` y `GET /api/citas`.
 - Captura donde se vean los `_links` HATEOAS.
+- Captura de Docker Desktop o Docker Lab con los dos contenedores ejecutandose.
 - Link del repositorio Git.
 - Link de Trello.
 - Link del video Kaltura.
@@ -421,7 +453,7 @@ El proyecto queda listo para entrega academica:
 - Validaciones implementadas.
 - Manejo de errores JSON.
 - Scripts SQL incluidos.
-- 6 pruebas unitarias.
+- 8 pruebas unitarias, 4 por cada microservicio.
 - JAR generable.
 - Dockerfile por microservicio.
 - Docker Compose incluido.

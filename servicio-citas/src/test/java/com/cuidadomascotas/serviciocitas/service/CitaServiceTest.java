@@ -7,6 +7,7 @@ import com.cuidadomascotas.serviciocitas.model.Cita;
 import com.cuidadomascotas.serviciocitas.model.EstadoCita;
 import com.cuidadomascotas.serviciocitas.repository.CitaRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,13 +19,17 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("CitaService - pruebas unitarias")
 class CitaServiceTest {
 
     @Mock
@@ -48,6 +53,7 @@ class CitaServiceTest {
     }
 
     @Test
+    @DisplayName("Debe crear y guardar una cita valida")
     void crearDebeGuardarCitaValida() {
         when(citaRepository.save(any(Cita.class))).thenAnswer(invocation -> {
             Cita cita = invocation.getArgument(0);
@@ -57,13 +63,16 @@ class CitaServiceTest {
 
         Cita creada = citaService.crear(citaDTO);
 
-        assertEquals(1L, creada.getId());
-        assertEquals("Matias Munoz", creada.getNombrePaciente());
-        assertEquals(EstadoCita.PROGRAMADA, creada.getEstado());
+        assertAll(
+                () -> assertEquals(1L, creada.getId()),
+                () -> assertEquals("Matias Munoz", creada.getNombrePaciente()),
+                () -> assertEquals(EstadoCita.PROGRAMADA, creada.getEstado())
+        );
         verify(citaRepository).save(any(Cita.class));
     }
 
     @Test
+    @DisplayName("Debe cancelar una cita programada")
     void cancelarDebeMarcarCitaComoCancelada() {
         Cita cita = new Cita(1L, "Matias Munoz", "matias@correo.cl", "Medicina General",
                 "Dra. Andrea Soto", LocalDate.of(2026, 6, 10), LocalTime.of(10, 30),
@@ -78,6 +87,7 @@ class CitaServiceTest {
     }
 
     @Test
+    @DisplayName("Debe calcular disponibilidad excluyendo horarios ocupados")
     void consultarDisponibilidadDebeExcluirHorariosOcupados() {
         LocalDate fecha = LocalDate.of(2026, 6, 10);
         Cita cita = new Cita(1L, "Paciente", "paciente@correo.cl", "Odontologia",
@@ -88,5 +98,17 @@ class CitaServiceTest {
 
         assertFalse(disponibilidad.getHorariosDisponibles().contains(LocalTime.of(9, 0)));
         assertEquals(List.of(LocalTime.of(9, 0)), disponibilidad.getHorariosOcupados());
+    }
+
+    @Test
+    @DisplayName("Debe rechazar cancelacion con un estado distinto de CANCELADA")
+    void cancelarDebeRechazarEstadosDistintosDeCancelada() {
+        EstadoCitaDTO dto = new EstadoCitaDTO(EstadoCita.CONFIRMADA);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> citaService.cancelar(1L, dto));
+
+        assertEquals("El endpoint de cancelacion solo acepta el estado CANCELADA", exception.getMessage());
+        verifyNoInteractions(citaRepository);
     }
 }
